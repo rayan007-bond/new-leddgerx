@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Login - Ledger X Admin</title>
+  
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .login-page {
+      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    .login-logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .login-logo .sitename {
+      color: #065f46;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .login-logo .subtitle {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .form-control {
+      border-radius: 8px;
+      padding: 12px 15px;
+      border: 2px solid #e2e8f0;
+      margin-bottom: 20px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+      border-color: #065f46;
+      box-shadow: 0 0 0 3px rgba(6, 95, 70, 0.1);
+    }
+    
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+    
+    .btn-login {
+      background: #065f46;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      width: 100%;
+      border: none;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-login:hover {
+      background: #047857;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    
+    .btn-login:disabled {
+      background: #9ca3af;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .alert {
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 12px 15px;
+      font-size: 14px;
+    }
+    
+    .spinner-border-sm {
+      width: 16px;
+      height: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 30px 25px;
+      }
+    }
+  </style>
+</head>
+
+<body class="login-page">
+  <div class="container">
+    <div class="login-card">
+      <div class="login-logo">
+        <h1 class="sitename">Ledger X</h1>
+        <p class="subtitle">Admin Portal</p>
+      </div>
+      
+      <div id="loginMessage"></div>
+      
+      <form id="loginForm">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" required placeholder="Enter your username">
+        </div>
+        
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        
+        <button type="submit" class="btn btn-login" id="loginBtn">
+          <span id="loginText">Sign In</span>
+          <div id="loginSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const loginBtn = document.getElementById('loginBtn');
+      const loginText = document.getElementById('loginText');
+      const loginSpinner = document.getElementById('loginSpinner');
+      const messageDiv = document.getElementById('loginMessage');
+      
+      // Show loading state
+      loginText.textContent = 'Signing In...';
+      loginSpinner.classList.remove('d-none');
+      loginBtn.disabled = true;
+      
+      const formData = new FormData(this);
+      
+      try {
+        const response = await fetch('admin/login.php', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          messageDiv.innerHTML = `<div class="alert alert-success">Login successful! Redirecting...</div>`;
+          setTimeout(() => {
+            window.location.href = 'admin.php';
+          }, 1000);
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+        }
+      } catch (error) {
+        messageDiv.innerHTML = `<div class="alert alert-danger">Network error. Please try again.</div>`;
+      } finally {
+        // Reset button state
+        loginText.textContent = 'Sign In';
+        loginSpinner.classList.add('d-none');
+        loginBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
